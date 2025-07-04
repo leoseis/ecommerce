@@ -127,7 +127,7 @@ Showcase REST API design and modern UI practices
 
 Handle real-world challenges like authentication, authorization, and data flow
 
-Provide a portfolio piece to show recruiters what I can build
+
 
 📬 Contact
 Leonard Emelieze
