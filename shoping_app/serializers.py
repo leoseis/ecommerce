@@ -1,5 +1,5 @@
 from rest_framework import serializers 
-from .models import Product
+from .models import Product, Cart,CartItem
 # from django.contrib.auth import get_user_model
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -20,3 +20,19 @@ class DetailedProductSerializer(serializers.ModelSerializer):
         products = Product.objects.filter(category=product.category).exclude(id=product.id)
         serializer = ProductSerializer(products, many=True)
         return serializer.data
+
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart 
+        fields = ["id", "cart_code",  "created_at", "modified_at"]
+
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    total = serializers.SerializerMethodField()
+    class Meta:
+        model = CartItem 
+        fields = ["id", "quantity", "product", "total"]
+
