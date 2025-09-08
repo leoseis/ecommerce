@@ -24,21 +24,22 @@ def product_detail(request, slug):
 
 @api_view(["POST"])
 def add_item(request):
-    try:
-        cart_code = request.data.get("cart_code")
-        product_id = request.data.get("product_id")
+    cart_code = request.data.get("cart_code")
+    product_id = request.data.get("product_id")
 
-        cart, created =Cart.objects.get_or_create(cart_code = cart_code)
+    if not product_id:
+        return Response({"error": "product_id is required"}, status=400)
+
+    try:
+        cart, created = Cart.objects.get_or_create(cart_code=cart_code)
         product = Product.objects.get(id=product_id)
 
-        cartitem, created  = CartItem.objects.get_or_create(cart=cart, product=product)
-        cartitem.quantity = 1 
+        cartitem, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        cartitem.quantity = 1
         cartitem.save()
 
-        serializer=CartItemSerializer(cartitem)
-        return Response({"datat": serializer.data, "message": "Cartitem created successfully"}, status=201)
-    except Exception as e:
-        return Response({"error": str(e)}, status=400)
-    
+        serializer = CartItemSerializer(cartitem)
+        return Response({"data": serializer.data, "message": "Cart item created successfully"}, status=201)
 
-# Create your views here.
+    except Product.DoesNotExist:
+        return Response({"error": "Invalid product_id"}, status=404)
