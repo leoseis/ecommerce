@@ -1,6 +1,6 @@
 from rest_framework import serializers 
 from .models import Product, Cart,CartItem
-# from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,15 +22,10 @@ class DetailedProductSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
-class CartSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cart 
-        fields = ["id", "cart_code",  "created_at", "modified_at"]
-
-
 
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
+    total = serializers.SerializerMethodField()
     product_id = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.all(), source="product", write_only=True
     )
@@ -38,7 +33,34 @@ class CartItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItem
-        fields = ["id", "quantity", "product", "product_id"]
+        fields = ["id", "quantity", "product", "product_id",'total']
+
+
+
+    def get_total(self, CartItem):
+        price = CartItem.product.price * CartItem.quantity
+        return price
+    
+
+class CartSerializer(serializers.ModelSerializer):
+    num_of_items = serializers.SerializerMethodField()
+    items = CartItemSerializer(read_only=True, many=True)
+    sum_total = serializers.SerializerMethodField()
+    class Meta:
+        model = Cart 
+        fields = ["id", "cart_code", "items","created_at", "num_of_items",  "modified_at","sum_total"]
+
+
+    def get_sum_total(self, cart):
+        items = cart.items.all()
+        total = sum([item.product.price * item.quantity for item in items])
+        return total
+    
+    def get_num_of_items(self, cart):
+        items = cart.items.all()
+        total = sum([item.quantity for item in items])
+        return total
+
 
 
 

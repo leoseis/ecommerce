@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
-from .serializers import CartItemSerializer, DetailedProductSerializer, ProductSerializer, SimpleCartSerializer
+from .serializers import CartItemSerializer, DetailedProductSerializer, ProductSerializer, SimpleCartSerializer,CartSerializer
 from rest_framework.response import Response
 from .models import Product, Cart, CartItem
 
@@ -34,11 +34,11 @@ def add_item(request):
         cart, created = Cart.objects.get_or_create(cart_code=cart_code)
         product = Product.objects.get(id=product_id)
 
-        cartitem, created = CartItem.objects.get_or_create(cart=cart, product=product)
-        cartitem.quantity = 1
-        cartitem.save()
+        CartItem, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        CartItem.quantity = 1
+        CartItem.save()
 
-        serializer = CartItemSerializer(cartitem)
+        serializer = CartItemSerializer(CartItem)
         return Response({"data": serializer.data, "message": "Cart item created successfully"}, status=201)
 
     except Product.DoesNotExist:
@@ -63,6 +63,14 @@ def get_cart_stat(request):
     cart_code = request.query_params.get("cart_code")
     cart = Cart.objects.get(cart_code=cart_code, paid=False)
     serializer = SimpleCartSerializer(cart)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_cart(request):
+    cart_code = request.query_params.get("cart_code")
+    cart = Cart.objects.get(cart_code=cart_code, paid=False)
+    serializer = CartSerializer(cart)
     return Response(serializer.data)
 
 
