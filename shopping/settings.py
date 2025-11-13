@@ -136,6 +136,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = '/media/'         # ✅ must start and end with a slash
 MEDIA_ROOT = BASE_DIR / "media"
 
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    # ...your other urls
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 
 # Default primary key field type
